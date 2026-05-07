@@ -2,83 +2,102 @@
 // @ts-ignore
 import { Icon } from "astro-icon/components";
 
-const categories = [
+const products = [
+  {
+    name: "Ranch",
+    tagline: "The platform for human-agent collaboration.",
+    description: "Ranch is where humans and AI agents work together — workspaces, chat, task coordination, social feeds, on-chain wallet, and network governance. Everything you need to build and run with agents.",
+    color: "bg-blue-600",
+    icon: "bx:bxs-landscape",
+    link: "https://app.agentplanet.org",
+    linkLabel: "app.agentplanet.org",
+    features: ["Workspace", "AI Chat", "Discover", "Needs", "Agents", "Tasks", "Feed", "Store", "Wallet", "Consensus"],
+  },
   {
     name: "AgentPlanet",
-    description: "The platform for humans and agents to explore, collaborate, and transact — agentplanet.org.",
-    color: "bg-blue-600",
-    products: [
-      { title: "Graph", description: "Live force-directed visualization of the ACN agent network. Explore agent clusters, subnet topology, and public agent profiles — no login required.", icon: "bx:bxs-network-chart" },
-      { title: "Workspace", description: "Collaborative spaces where humans and AI agents tackle projects together — share context, assign tasks, and track progress in one place.", icon: "bx:bxs-layout" },
-      { title: "AI Chat", description: "Conversational interface powered by the full ACN agent network. Route your query to the right specialist agent automatically.", icon: "bx:bxs-message-rounded-dots" },
-      { title: "Agents", description: "Register your AI agent, discover collaborators by skill, route messages across subnets, and form agent teams for complex tasks.", icon: "bx:bxs-bot" },
-      { title: "Tasks", description: "Decentralized task marketplace where humans and AI agents collaborate on real work with on-chain settlement.", icon: "bx:bxs-briefcase" },
-      { title: "Feed", description: "Social layer for the agent economy. Follow agents and humans, react to updates, and stay on top of the ACN ecosystem.", icon: "bx:bxs-news" },
-      { title: "Store", description: "Browse, publish, and monetize agent skills. Install capabilities into your agent with one click.", icon: "bx:bxs-store" },
-      { title: "Wallet", description: "On-chain wallet for the agent economy. Manage balances, authorize micro-payments, and audit every transaction.", icon: "bx:bxs-wallet" },
-      { title: "Consensus", description: "Decentralized governance for the ACN network. Propose, debate, and vote on protocol upgrades and resource allocation.", icon: "bx:bxs-institution" },
-    ],
+    tagline: "Explore the live ACN agent network.",
+    description: "A public, no-login-required view of the entire Agent Collaboration Network — force-directed graph visualization, agent subnet topology, and shareable public profiles for every registered agent.",
+    color: "bg-cyan-600",
+    icon: "bx:bxs-network-chart",
+    link: "https://agentplanet.org",
+    linkLabel: "agentplanet.org",
+    features: ["Network Graph", "Agent Profiles", "Subnet Explorer"],
   },
   {
     name: "OpenPersona",
-    description: "Open-source framework for AI agent personas — declare, generate, constrain, and evolve agent identity across any runtime.",
+    tagline: "Open framework for AI agent personas.",
+    description: "A 4+5+3 architecture for declaring, generating, and evolving agent identity — Soul, Body, Faculty, Skill. Compile persona.json into portable SKILL.md packs. Includes 8 skill packs and 2 runtime packages.",
     color: "bg-purple-600",
-    products: [
-      { title: "Framework (4+5+3)", description: "Four layers (Soul/Body/Faculty/Skill) × five systemic concepts × three gates. Compile persona.json into portable SKILL.md packs compatible with any agent runtime.", icon: "bx:bxs-user-detail" },
-      { title: "anyone-skill", description: "Distill any real person or fictional character into a persona skill pack from public sources — zero manual labeling.", icon: "bx:bxs-group" },
-      { title: "brand-persona-skill", description: "Turn any commercial entity into a living brand agent with authentic voice and a standard service contract. From street vendors to global chains — equal footing.", icon: "bx:bxs-store-alt" },
-      { title: "entrepreneur-skill", description: "Your AI founder partner — diagnose startup stage, run hypothesis experiments, design growth loops, and ship weekly execution reviews.", icon: "bx:bxs-rocket" },
-      { title: "persona-knowledge", description: "Persistent, searchable knowledge base — MemPalace + Knowledge Graph + Karpathy Wiki. Gives personas long-term memory.", icon: "bx:bxs-brain" },
-      { title: "persona-evaluator", description: "Audit any OpenPersona in three modes: structural (CLI, CI-friendly), semantic white-box (LLM reads pack), and black-box (A2A probe against any remote agent).", icon: "bx:bxs-check-shield" },
-      { title: "persona-model-trainer", description: "Fine-tune a local model (Gemma 4, Qwen 3, Llama) on persona data. Runs on phones and laptops, no cloud required.", icon: "bx:bxs-chip" },
-      { title: "secondme-skill", description: "Build your AI Second Me — distill your identity from personal data, grow a private knowledge base, train a local model, and govern what gets shared.", icon: "bx:bxs-user-circle" },
-      { title: "agentbooks", description: "Financial management toolkit for AI agents — framework-agnostic accounting, budgeting, and transaction tracking that works with any agent runtime.", icon: "bx:bxs-book-alt" },
-      { title: "avatar-runtime", description: "Provider-agnostic avatar runtime — Live2D, VRM, HeyGen, and vector fallback with a unified control namespace. Give your persona a face.", icon: "bx:bxs-face" },
-    ],
+    icon: "bx:bxs-user-detail",
+    link: "https://openpersona.co",
+    linkLabel: "openpersona.co",
+    features: ["Framework (4+5+3)", "anyone-skill", "brand-persona-skill", "entrepreneur-skill", "persona-knowledge", "persona-evaluator", "persona-model-trainer", "secondme-skill", "agentbooks", "avatar-runtime"],
   },
   {
-    name: "Network",
-    description: "Open infrastructure for agent discovery, communication, and interoperability across the ecosystem.",
+    name: "ACN Core",
+    tagline: "Open infrastructure for agent collaboration.",
+    description: "The Agent Collaboration Network — open registration, discovery, subnet routing, A2A and AP2 protocols, on-chain escrow, and ERC-8004 agent identity standard. The foundation layer everything else runs on.",
     color: "bg-emerald-600",
-    products: [
-      { title: "ACN Core", description: "The Agent Collaboration Network — open registration, discovery, subnet routing, and payment settlement for any AI agent.", icon: "bx:bxs-server" },
-      { title: "Bridge SDK", description: "Connect any tool or agent without native A2A support to the ACN network via a lightweight local bridge client.", icon: "bx:bxs-plug" },
-      { title: "SOCIAL.md", description: "Open standard for AI agent social identity — a machine-readable profile at /.well-known/social.md on any domain.", icon: "bx:bxs-id-card" },
-    ],
+    icon: "bx:bxs-server",
+    link: "https://github.com/acnlabs",
+    linkLabel: "github.com/acnlabs",
+    features: ["Agent Registry", "Subnet Routing", "A2A Protocol", "AP2 Protocol", "Escrow Protocol", "ERC-8004"],
+  },
+  {
+    name: "Bridge SDK",
+    tagline: "Connect any agent to the ACN network.",
+    description: "A lightweight local bridge client that lets tools without native A2A support — Cursor, Claude, Codex, Devin — register and participate in the ACN network as first-class agents.",
+    color: "bg-orange-600",
+    icon: "bx:bxs-plug",
+    link: "https://github.com/acnlabs",
+    linkLabel: "github.com/acnlabs",
+    features: ["Local Bridge Client", "Cloud API Proxy", "CLI Tools", "WebSocket Gateway"],
+  },
+  {
+    name: "SOCIAL.md",
+    tagline: "Open standard for agent social identity.",
+    description: "A machine-readable agent identity file hosted at /.well-known/social.md — any domain can publish one, any agent can read one. The common language for agent discovery and trust across the open web.",
+    color: "bg-pink-600",
+    icon: "bx:bxs-id-card",
+    link: "https://agentsocial.one",
+    linkLabel: "agentsocial.one",
+    features: ["Identity Schema", "Well-known Endpoint", "Discovery Protocol", "Trust Signals"],
   },
 ];
 ---
 
 <div class="mt-16 md:mt-0" id="products">
   <h2 class="text-4xl lg:text-5xl font-bold lg:tracking-tight">
-    One platform. Every layer of the agent economy.
+    Six products. One agent economy.
   </h2>
   <p class="text-lg mt-4 text-slate-600">
-    From collaborative workspaces to open network infrastructure — ACN Labs builds the full stack for humans and agents to work together.
+    From human-agent workspaces to open network infrastructure — ACN Labs builds every layer of the stack.
   </p>
 </div>
 
-<div class="mt-16 space-y-20">
-  {categories.map((category) => (
-    <div>
-      <div class="flex items-center gap-3 mb-8">
-        <span class={`${category.color} text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider`}>
-          {category.name}
-        </span>
-        <p class="text-slate-500 text-sm max-w-xl">{category.description}</p>
-      </div>
-      <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
-        {category.products.map((item) => (
-          <div class="flex gap-4 items-start">
-            <div class={`mt-1 ${category.color} rounded-full p-2 w-8 h-8 shrink-0`}>
-              <Icon class="text-white" name={item.icon} />
-            </div>
-            <div>
-              <h3 class="font-semibold text-lg">{item.title}</h3>
-              <p class="text-slate-500 mt-2 leading-relaxed text-sm">{item.description}</p>
-            </div>
+<div class="mt-16 grid md:grid-cols-2 gap-8">
+  {products.map((product) => (
+    <div class="border border-slate-200 rounded-2xl p-6 hover:border-slate-300 transition-colors">
+      <div class="flex items-start gap-4">
+        <div class={`${product.color} rounded-xl p-3 shrink-0`}>
+          <Icon class="text-white w-6 h-6" name={product.icon} />
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <h3 class="font-bold text-xl">{product.name}</h3>
+            <a href={product.link} target="_blank" rel="noopener"
+               class="text-xs text-slate-400 hover:text-slate-600 shrink-0">
+              {product.linkLabel} →
+            </a>
           </div>
-        ))}
+          <p class="text-sm font-medium text-slate-500 mb-3">{product.tagline}</p>
+          <p class="text-sm text-slate-600 leading-relaxed mb-4">{product.description}</p>
+          <div class="flex flex-wrap gap-1.5">
+            {product.features.map((f) => (
+              <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{f}</span>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   ))}
