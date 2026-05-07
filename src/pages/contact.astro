@@ -1,0 +1,38 @@
+---
+import Contactform from "@/components/contactform.astro";
+import Container from "@/components/container.astro";
+import Sectionhead from "@/components/sectionhead.astro";
+import Layout from "@/layouts/Layout.astro";
+import { Icon } from "astro-icon/components";
+---
+
+<Layout title="Contact — ACN Labs">
+  <Container>
+    <Sectionhead>
+      <Fragment slot="title">Get in Touch</Fragment>
+      <Fragment slot="desc">We'd love to hear from you.</Fragment>
+    </Sectionhead>
+
+    <div class="grid md:grid-cols-2 gap-10 mx-auto max-w-4xl mt-16">
+      <div>
+        <h2 class="font-medium text-2xl text-gray-800">Contact ACN Labs</h2>
+        <p class="text-lg leading-relaxed text-slate-500 mt-3">
+          Have a question about ACN Labs products, partnerships, or enterprise plans? Fill out the form and we'll get back to you within one business day.
+        </p>
+        <div class="mt-5">
+          <div class="flex items-center mt-2 space-x-2 text-gray-600">
+            <Icon class="text-gray-400 w-4 h-4" name="uil:envelope" />
+            <a href="mailto:hello@acn.ai">hello@acn.ai</a>
+          </div>
+          <div class="flex items-center mt-2 space-x-2 text-gray-600">
+            <Icon class="text-gray-400 w-4 h-4" name="bx:bxl-github" />
+            <a href="https://github.com/agentplanet" target="_blank" rel="noopener">github.com/agentplanet</a>
+          </div>
+        </div>
+      </div>
+      <div>
+        <Contactform />
+      </div>
+    </div>
+  </Container>
+</Layout>
