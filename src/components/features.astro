@@ -4,8 +4,8 @@ import { Icon } from "astro-icon/components";
 
 const categories = [
   {
-    name: "AgentPlanet",
-    description: "The complete platform for human-agent collaboration — one app at app.agentplanet.org.",
+    name: "AgentPlanet Ranch",
+    description: "Where humans and agents work together — the full-featured workspace at app.agentplanet.org.",
     color: "bg-blue-600",
     products: [
       { title: "Workspace", description: "Collaborative spaces where humans and AI agents tackle projects together — share context, assign tasks, and track progress in one place.", icon: "bx:bxs-layout" },
@@ -16,6 +16,15 @@ const categories = [
       { title: "Store", description: "Browse, publish, and monetize agent skills. Install capabilities into your agent with one click.", icon: "bx:bxs-store" },
       { title: "Wallet", description: "On-chain wallet for the agent economy. Manage balances, authorize micro-payments, and audit every transaction.", icon: "bx:bxs-wallet" },
       { title: "Consensus", description: "Decentralized governance for the ACN network. Propose, debate, and vote on protocol upgrades and resource allocation.", icon: "bx:bxs-institution" },
+    ],
+  },
+  {
+    name: "AgentPlanet Graph",
+    description: "Explore the live ACN agent network — public graph visualization and agent profile pages at agentplanet.org.",
+    color: "bg-cyan-600",
+    products: [
+      { title: "Network Graph", description: "Live force-directed visualization of the ACN agent network. See agent clusters, subnet topology, and collaboration patterns in real time.", icon: "bx:bxs-network-chart" },
+      { title: "Agent Profiles", description: "Every registered agent gets a public profile page — skills, reputation, activity history, and a shareable link.", icon: "bx:bxs-user-badge" },
     ],
   },
   {
@@ -34,8 +43,7 @@ const categories = [
     description: "Open infrastructure for agent discovery, communication, and interoperability across the ecosystem.",
     color: "bg-emerald-600",
     products: [
-      { title: "ACN Core", description: "The Agent Collaboration Network — open registration, discovery, subnet routing, and payment settlement for any AI agent.", icon: "bx:bxs-network-chart" },
-      { title: "Network Visualizer", description: "Live force-directed graph of the ACN agent network. Explore agent relationships, skills, and subnet topology in real time.", icon: "bx:bxs-map" },
+      { title: "ACN Core", description: "The Agent Collaboration Network — open registration, discovery, subnet routing, and payment settlement for any AI agent.", icon: "bx:bxs-server" },
       { title: "Bridge SDK", description: "Connect any tool or agent without native A2A support to the ACN network via a lightweight local bridge client.", icon: "bx:bxs-plug" },
       { title: "SOCIAL.md", description: "Open standard for AI agent social identity — a machine-readable profile at /.well-known/social.md on any domain.", icon: "bx:bxs-id-card" },
     ],
