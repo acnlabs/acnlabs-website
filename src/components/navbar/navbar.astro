@@ -1,38 +1,54 @@
 ---
 import Container from "@/components/container.astro";
 import Link from "@/components/ui/link.astro";
-import Dropdown from "./dropdown.astro";
 import { Astronav, MenuItems, MenuIcon } from "astro-navbar";
 
-const menuitems = [
+const productGroups = [
   {
-    title: "Products",
-    path: "#",
-    children: [
-      { title: "Agents — AI Collaboration", path: "/#products" },
-      { title: "Tasks — Task Marketplace", path: "/#products" },
-      { title: "Feed — Social Feed", path: "/#products" },
-      { title: "Store — Skill Store", path: "/#products" },
-      { title: "Wallet — On-chain Wallet", path: "/#products" },
-      { title: "Consensus — Governance", path: "/#products" },
+    label: "Platform",
+    items: [
+      { title: "Workspace", path: "/products#platform" },
+      { title: "AI Chat", path: "/products#platform" },
+      { title: "Discover", path: "/products#platform" },
+      { title: "Needs", path: "/products#platform" },
     ],
   },
   {
-    title: "Pricing",
-    path: "/pricing",
+    label: "Labs",
+    items: [
+      { title: "Agents", path: "/products#labs" },
+      { title: "Tasks", path: "/products#labs" },
+      { title: "Feed", path: "/products#labs" },
+      { title: "Store", path: "/products#labs" },
+      { title: "Wallet", path: "/products#labs" },
+      { title: "Consensus", path: "/products#labs" },
+    ],
   },
   {
-    title: "About",
-    path: "/about",
+    label: "OpenPersona",
+    items: [
+      { title: "Framework", path: "/products#openpersona" },
+      { title: "anyone-skill", path: "/products#openpersona" },
+      { title: "persona-model-trainer", path: "/products#openpersona" },
+    ],
   },
   {
-    title: "Blog",
-    path: "/blog",
+    label: "Network",
+    items: [
+      { title: "ACN Core", path: "/products#network" },
+      { title: "Network Visualizer", path: "/products#network" },
+      { title: "Bridge SDK", path: "/products#network" },
+      { title: "SOCIAL.md", path: "/products#network" },
+    ],
   },
-  {
-    title: "Contact",
-    path: "/contact",
-  },
+];
+
+const menuitems = [
+  { title: "Products", path: "/products", hasDropdown: true },
+  { title: "Pricing", path: "/pricing" },
+  { title: "About", path: "/about" },
+  { title: "Blog", path: "/blog" },
+  { title: "Contact", path: "/contact" },
 ];
 ---
 
@@ -49,28 +65,38 @@ const menuitems = [
       </div>
       <MenuItems class="hidden w-full lg:w-auto mt-2 lg:flex lg:mt-0">
         <ul class="flex flex-col lg:flex-row lg:gap-3">
-          {
-            menuitems.map((item, index) => (
-              <>
-                {item.children && (
-                  <Dropdown
-                    title={item.title}
-                    children={item.children}
-                    lastItem={index === menuitems.length - 1}
-                  />
+          {menuitems.map((item) => (
+            <li class="relative group">
+              <a
+                href={item.path}
+                class="flex lg:px-3 py-2 items-center text-gray-600 hover:text-gray-900 gap-1">
+                <span>{item.title}</span>
+                {item.hasDropdown && (
+                  <svg class="w-3 h-3 mt-0.5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
                 )}
-                {!item.children && (
-                  <li>
-                    <a
-                      href={item.path}
-                      class="flex lg:px-3 py-2 items-center text-gray-600 hover:text-gray-900">
-                      <span>{item.title}</span>
-                    </a>
-                  </li>
-                )}
-              </>
-            ))
-          }
+              </a>
+              {item.hasDropdown && (
+                <div class="hidden group-hover:grid grid-cols-2 absolute top-full left-0 bg-white border border-gray-100 rounded-xl shadow-xl p-4 gap-6 w-[480px] z-50">
+                  {productGroups.map((group) => (
+                    <div>
+                      <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">{group.label}</p>
+                      <ul class="space-y-1">
+                        {group.items.map((sub) => (
+                          <li>
+                            <a href={sub.path} class="text-sm text-slate-600 hover:text-indigo-600 hover:underline block py-0.5">
+                              {sub.title}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </li>
+          ))}
         </ul>
         <div class="lg:hidden flex items-center mt-3 gap-4">
           <Link href="https://labs.acn.ai/login" style="muted" block size="md">Log in</Link>
