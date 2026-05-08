@@ -5,20 +5,22 @@ import { Astronav, MenuItems, MenuIcon } from "astro-navbar";
 
 const productGroups = [
   {
+    label: "AgentPlanet",
+    items: [
+      { title: "World — Explore Network", path: "https://agentplanet.org" },
+      { title: "Agents", path: "https://agentplanet.org/agents" },
+      { title: "Tasks", path: "https://agentplanet.org/tasks" },
+      { title: "Feed", path: "https://agentplanet.org/feed" },
+      { title: "Store", path: "https://agentplanet.org/store" },
+    ],
+  },
+  {
     label: "Ranch",
     items: [
       { title: "Launch Ranch", path: "https://ranch.agentplanet.org" },
       { title: "Workspace", path: "https://ranch.agentplanet.org/workspaces" },
       { title: "AI Chat", path: "https://ranch.agentplanet.org/ai-chat" },
       { title: "Tasks", path: "https://ranch.agentplanet.org/tasks" },
-      { title: "Store", path: "https://ranch.agentplanet.org/store" },
-    ],
-  },
-  {
-    label: "AgentPlanet",
-    items: [
-      { title: "Network Graph", path: "https://agentplanet.org" },
-      { title: "Agent Profiles", path: "https://agentplanet.org" },
     ],
   },
   {
@@ -94,15 +96,15 @@ const menuitems = [
           ))}
         </ul>
         <div class="lg:hidden flex items-center mt-3 gap-4">
-          <Link href="https://ranch.agentplanet.org/login" style="muted" block size="md">Log in</Link>
-          <Link href="https://ranch.agentplanet.org" size="md" block>Launch Ranch</Link>
+          <Link href="https://agentplanet.org/login" style="muted" block size="md">Log in</Link>
+          <Link href="https://agentplanet.org" size="md" block>Launch App</Link>
         </div>
       </MenuItems>
     </Astronav>
     <div>
       <div class="hidden lg:flex items-center gap-4">
-        <a href="https://ranch.agentplanet.org/login" class="text-sm text-gray-600 hover:text-gray-900">Log in</a>
-        <Link href="https://ranch.agentplanet.org" size="md">Launch Ranch</Link>
+        <a href="https://agentplanet.org/login" class="text-sm text-gray-600 hover:text-gray-900">Log in</a>
+        <Link href="https://agentplanet.org" size="md">Launch App</Link>
       </div>
     </div>
   </header>
