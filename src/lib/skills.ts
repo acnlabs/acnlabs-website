@@ -48,8 +48,7 @@ export const SKILL_SOURCES: SkillSource[] = [
     label: "AgentPlanet Store — Seller",
     owner: "AgentPlanet",
     badge: "AgentPlanet",
-    source:
-      "https://agentplanet-backend-production.up.railway.app/api/store/skill.md",
+    source: "https://api.agenticplanet.space/api/store/skill.md",
     repo: "https://github.com/acnlabs/Agentplanet-backend",
     homepage: "https://agentplanet.org",
     snapshot: storeSnapshot,
