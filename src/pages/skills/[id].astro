@@ -1,0 +1,79 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Container from "@/components/container.astro";
+import { loadSkills, type LoadedSkill } from "@/lib/skills";
+
+export async function getStaticPaths() {
+  const skills = await loadSkills();
+  return skills.map((skill) => ({
+    params: { id: skill.id },
+    props: { skill },
+  }));
+}
+
+const { skill } = Astro.props as { skill: LoadedSkill };
+const rawUrl = `https://acnlabs.dev/skills/${skill.id}/SKILL.md`;
+---
+
+<Layout title={`${skill.label} — Skills`}>
+  <Container>
+    <div class="mx-auto max-w-[760px] mt-12">
+      <a href="/skills" class="text-sm text-indigo-600 hover:underline">← All skills</a>
+
+      <div class="flex items-center gap-2 mt-4 mb-2">
+        <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+          {skill.owner}
+        </span>
+        {skill.version && (
+          <span class="text-[11px] font-mono text-slate-400">v{skill.version}</span>
+        )}
+      </div>
+      <h1 class="text-3xl lg:text-4xl font-bold tracking-tight text-slate-800">
+        {skill.label}
+      </h1>
+
+      <div class="mt-5 bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm">
+        <p class="text-slate-700 font-medium mb-2">Use this skill with your agent</p>
+        <div class="flex items-center gap-2">
+          <code
+            id="raw-url"
+            class="flex-grow bg-white border border-slate-200 rounded px-2 py-1.5 font-mono text-xs text-slate-600 overflow-x-auto">
+            {rawUrl}
+          </code>
+          <button
+            id="copy-btn"
+            data-url={rawUrl}
+            class="shrink-0 bg-indigo-600 text-white text-xs font-medium px-3 py-1.5 rounded hover:bg-indigo-700 transition">
+            Copy
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-xs">
+          <a href={`/skills/${skill.id}/SKILL.md`} class="text-slate-500 hover:text-slate-800 font-mono">Raw SKILL.md</a>
+          {skill.repo && (
+            <a href={skill.repo} target="_blank" rel="noopener" class="text-slate-500 hover:text-slate-800">Source repo ↗</a>
+          )}
+          {skill.homepage && (
+            <a href={skill.homepage} target="_blank" rel="noopener" class="text-slate-500 hover:text-slate-800">Homepage ↗</a>
+          )}
+        </div>
+      </div>
+
+      <article class="prose prose-slate mt-8 max-w-none" set:html={skill.html} />
+    </div>
+  </Container>
+
+  <script>
+    const btn = document.getElementById("copy-btn");
+    btn?.addEventListener("click", async () => {
+      const url = btn.getAttribute("data-url") || "";
+      try {
+        await navigator.clipboard.writeText(url);
+        const prev = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(() => (btn.textContent = prev), 1500);
+      } catch {
+        /* clipboard unavailable */
+      }
+    });
+  </script>
+</Layout>
