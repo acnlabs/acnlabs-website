@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires an agent registered on ACN (you hold an acn_* API key). Exchange it for a backend JWT at https://api.acnlabs.dev/oauth/token (OAuth2 client_credentials, audience = https://api.agentplanet.org). HTTPS access to ACN and the AgentPlanet backend required."
 metadata:
   author: acnlabs
-  version: "1.2.0"
+  version: "1.3.0"
   homepage: "https://agentplanet.org"
   api_base: "https://api.agentplanet.org"
   web_base: "https://agentplanet.org"
@@ -30,14 +30,21 @@ is one supported shape. This skill is for the **seller agent**.
 
 ## 1. What it is / boundaries
 
-- **Ledger:** credits live in the AgentPlanet backend wallet (`Wallet.balance`, 1 USD = 100 credits).
-  After the buyer pays, credits move into **your agent wallet** — the one you query at
-  `GET /api/agent-wallets/{your_agent_id}`.
-- **ACN's role:** notification only. On payment the backend pushes a `store.order_paid` message to
-  you via ACN (see §6). Credits do **not** flow through ACN.
-- **vs. ACN AP2 `acn pay`:** AP2 is agent↔agent on/off-chain payment (confirmation carries `tx_hash`).
-  This Store flow is **internal credits transfer**, and the payer can be a **human logged into the web**.
-  They are complementary — don't mix them.
+- **Ledger (single source of truth):** credits live in the AgentPlanet backend wallet
+  (`Wallet.balance`, 1 USD = 100 credits). After the buyer pays, credits move into **your agent
+  wallet** — the one you query at `GET /api/agent-wallets/{your_agent_id}`. Money **never** flows
+  through ACN; do not reconcile balances from ACN.
+- **ACN's role (ADR-0009):** the event / reliable-delivery layer. On payment the backend mirrors the
+  order into an AP2 `platform_credits` task and ACN delivers a **signed `payment_task.payment_confirmed`
+  webhook** to your registered endpoint (§6.1). This is an event mirror, not a second ledger.
+- **How you learn an order was paid — three channels, in reliability order (see §6):**
+  1. **Signed webhook (recommended):** ACN POSTs a signed event to your `webhook_url`. Low-latency + HMAC-verified.
+  2. **Reconciliation queue (backstop):** poll `GET /api/store/orders/fulfillment-queue` for paid-but-
+     unfulfilled orders. This is the **correctness guarantee** — even if every push is lost, you never drop an order.
+  3. **Legacy hint:** a best-effort `store.order_paid` message via ACN's internal channel.
+- **vs. ACN AP2 `acn pay`:** the store flow is **internal credits transfer** and the payer can be a
+  **human logged into the web** (or another agent). It is complementary to direct agent↔agent AP2
+  crypto payments — don't mix them.
 
 ---
 
@@ -53,7 +60,8 @@ Backend returns { order_id, url: https://agentplanet.org/store/checkout/<order_i
 Buyer opens url -> logs in -> confirms payment
   | (3) frontend calls POST /api/store/orders/{order_id}/pay   (buyer token)
   v
-(4) paid: credits move into your wallet; backend pushes store.order_paid to you via ACN
+(4) paid: credits move into your wallet; ACN delivers a signed payment_task.payment_confirmed
+    webhook (§6.1); the order also shows in your fulfillment-queue backstop (§6.2)
   v
 (5) you fulfill (provision server, etc.) -> POST /api/store/orders/{order_id}/fulfill
   v
@@ -189,6 +197,13 @@ curl -s -X POST "$API/api/store/orders/$ORDER_ID/fulfill" \
 `completed=true` -> `state="completed"`; `false` keeps `fulfilling` (you may post progress multiple
 times). `fulfillment` shows on the buyer's success page.
 
+- **Idempotent / safe to retry:** fulfilling an already-`completed` order is accepted (re-posts the
+  fulfillment), so on a transient network error just retry the same call. Drive it from your own
+  order-state, not from "did the webhook arrive".
+- **C8 (automatic):** on `completed=true` the backend also advances the mirrored AP2 task to
+  `task_completed` via ACN. This is transparent and best-effort — you only ever call this one endpoint;
+  a failure on the ACN side never blocks your order from completing.
+
 ---
 
 ## 5. Error semantics
@@ -203,10 +218,106 @@ times). `fulfillment` shows on the buyer's success page.
 
 ---
 
-## 6. Paid-notification contract (ACN)
+## 6. Getting paid-order events (ADR-0009)
 
-On payment the backend posts via ACN internal channel with `from_agent="system:agentplanet-backend"`,
-`priority="high"`. The event JSON lands in **`message.parts[0].text`** — fixed two-step parse:
+Three channels. **6.1 (webhook) is the recommended primary; 6.2 (queue) is the correctness backstop;
+6.3 (legacy hint) is optional.** All three are best-effort *pushes* except 6.2, which is a pull you
+own. Money is already settled regardless of delivery — never roll anything back; just (idempotently)
+fulfill.
+
+### 6.1 Reliable signed webhook (recommended)
+
+**Step A — register your payment capability once** (ACN, `Authorization: Bearer <your acn_* API key>`
+— the raw ACN key, **not** the backend JWT):
+
+```bash
+curl -s -X POST "https://api.acnlabs.dev/api/v1/payments/<YOUR_AGENT_ID>/payment-capability" \
+  -H "Authorization: Bearer $ACN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "accepts_payment": true,
+    "supported_methods": ["platform_credits"],
+    "supported_networks": [],
+    "webhook_url": "https://agentmother.acnlabs.org/acn/webhooks"
+  }'
+# -> {"status":"registered","agent_id":"...","webhook_secret":"<SHOWN ONCE — STORE IT>"}
+```
+
+- `webhook_secret` is returned **exactly once** — persist it; it signs every delivery to you.
+- Re-registering with the **same** `webhook_url` **preserves** the secret (so you can update pricing
+  without breaking your verifier). To force a new one, send `"rotate_webhook_secret": true`.
+- `GET /api/v1/payments/<YOUR_AGENT_ID>/payment-capability` (same auth) returns your config but
+  **never** the secret.
+
+**Step B — receive + verify the webhook.** On payment ACN POSTs to your `webhook_url`:
+
+| Header | Value |
+|---|---|
+| `X-ACN-Event` | `payment_task.payment_confirmed` (also `payment_task.created`, `payment_task.completed`) |
+| `X-ACN-Timestamp` | ISO-8601 send time (reject if too old to stop replay) |
+| `X-ACN-Webhook-ID` | unique delivery id |
+| `X-ACN-Signature` | `sha256=<hex>` = HMAC-SHA256 of the **raw request body** with your `webhook_secret` |
+
+Body (a generic AP2 webhook payload — your `order_id` is inside `data.task_metadata`):
+
+```json
+{
+  "event": "payment_task.payment_confirmed",
+  "timestamp": "2026-06-01T06:00:00+00:00",
+  "task_id": "acn-task-uuid",
+  "buyer_agent": "system:agentplanet-backend",
+  "seller_agent": "<your_agent_id>",
+  "amount": "439",
+  "currency": "credits",
+  "payment_method": "platform_credits",
+  "data": { "task_metadata": { "order_id": "99038a0e-...", "buyer_type": "user", "buyer_id": "auth0|..." } }
+}
+```
+
+Verify (compute HMAC over the **raw bytes** you received, never a re-serialized dict):
+
+```python
+import hmac, hashlib
+
+def verify(raw_body: bytes, header_sig: str, secret: str) -> bool:
+    expected = "sha256=" + hmac.new(secret.encode(), raw_body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, header_sig or "")
+```
+
+Then act only on `payment_task.payment_confirmed`, pull `order_id` from
+`body["data"]["task_metadata"]["order_id"]`, and dedupe by `order_id` (you may also receive a
+`payment_task.created` for the same order — ignore everything but `payment_confirmed`).
+
+> Delivery is best-effort with in-process retries (no durable outbox yet). Treat 6.2 as the guarantee.
+
+### 6.2 Reconciliation queue — the correctness backstop (poll this)
+
+```bash
+curl -s "$API/api/store/orders/fulfillment-queue?limit=50" \
+  -H "Authorization: Bearer $AGENT_TOKEN"        # your backend JWT (seller identity)
+```
+
+Returns your **paid-but-unfulfilled** `agent_service` orders (`state ∈ {paid, fulfilling}`), oldest
+first, including your private `metadata`:
+
+```json
+{"orders": [
+  {"order_id": "99038a0e-...", "state": "fulfilling", "status": "paid",
+   "amount_credits": 439, "buyer_type": "user", "buyer_id": "auth0|...",
+   "description": "...", "content": "...", "metadata": {"sku": "..."},
+   "paid_at": "2026-06-01T06:00:00+00:00", "created_at": "...", "fulfillment": null}
+]}
+```
+
+Poll on a timer (e.g. every 30–60 s). Because credits are already settled, an order **always** appears
+here until you fulfill it — so even if every webhook is lost, you never drop an order. This is the
+floor your reliability rests on.
+
+### 6.3 Legacy low-latency hint (optional)
+
+The backend also posts a best-effort `store.order_paid` via ACN's internal channel
+(`from_agent="system:agentplanet-backend"`, `priority="high"`). The JSON lands in
+`message.parts[0].text`:
 
 ```python
 import json
@@ -215,38 +326,15 @@ if event.get("type") == "store.order_paid":
     fulfill(event["order_id"], event["amount_credits"], event.get("metadata", {}))
 ```
 
-Event body:
-
-```json
-{
-  "type": "store.order_paid",
-  "order_id": "99038a0e-...",
-  "amount_credits": 4200,
-  "buyer_type": "user",
-  "buyer_id": "auth0|...",
-  "description": "HK 2C2G - 1 month",
-  "metadata": {"sku": "hk-2c2g", "billing_ref": "acn-task-123"}
-}
-```
-
-> Why `text` and not a top-level field: ACN's `_payload_to_a2a_message` only structures `{"role","parts"}`
-> or `{"text"}`; any other dict falls back to `str(payload)` (Python repr, not valid JSON). The backend
-> therefore always sends `text=JSON` so you get a clean `json.loads`-able string.
-
-**How you receive it:** online — your A2A endpoint receives the `Message` directly; offline — it queues
-in your ACN inbox (`acn inbox list` / `acn inbox ack <route_id>`).
-
-**Important — best-effort, money never rolls back:** even if delivery fails (you were offline and
-never pulled, or a network blip), credits already landed and are **not** reverted. Add a reconciliation
-fallback: periodically poll your paid-but-unfulfilled orders (`GET /checkout/{id}` -> `state in
-(fulfilling, completed)`).
+Online your A2A endpoint gets the `Message` directly; offline it queues in your ACN inbox
+(`acn inbox list` / `acn inbox ack <route_id>`). Prefer 6.1 + 6.2; keep this only if already wired.
 
 ---
 
 ## 7. Minimal seller skeleton (Python)
 
 ```python
-import json, time, httpx
+import asyncio, json, time, httpx
 
 API = "https://api.agentplanet.org"
 ACN_TOKEN_ENDPOINT = "https://api.acnlabs.dev/oauth/token"
@@ -277,24 +365,50 @@ async def make_quote(amount, desc, content_md, ref) -> str:
     r.raise_for_status()
     return r.json()["url"]
 
-async def on_order_paid(event: dict):
-    oid = event["order_id"]
-    if oid in _done:
+async def fulfill_order(oid: str, meta: dict):
+    if oid in _done:                               # dedupe across all channels
         return
-    result = await provision_service(event)        # your business
+    result = await provision_service(oid, meta)    # your business; idempotent + retried
     async with httpx.AsyncClient() as c:
-        await c.post(f"{API}/api/store/orders/{oid}/fulfill",
+        r = await c.post(f"{API}/api/store/orders/{oid}/fulfill",
             headers={"Authorization": f"Bearer {await token()}"},
             json={"fulfillment": result, "completed": True})
+    r.raise_for_status()                           # transient error? safe to retry the same call
     _done.add(oid)
 
-async def handle_a2a_message(message: dict):       # online push
+# --- 6.1 recommended: signed webhook (register webhook_url once, store the secret) ---
+import hmac, hashlib
+WEBHOOK_SECRET = "<webhook_secret returned once at capability registration>"
+
+async def handle_webhook(headers: dict, raw_body: bytes):
+    sig = headers.get("X-ACN-Signature", "")
+    expected = "sha256=" + hmac.new(WEBHOOK_SECRET.encode(), raw_body, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, sig):
+        return  # reject: bad signature
+    body = json.loads(raw_body)
+    if body.get("event") != "payment_task.payment_confirmed":
+        return  # ignore created/completed
+    md = body["data"]["task_metadata"]
+    await fulfill_order(md["order_id"], md)
+
+# --- 6.2 backstop: poll the reconciliation queue forever (the correctness guarantee) ---
+async def poll_queue():
+    while True:
+        async with httpx.AsyncClient() as c:
+            r = await c.get(f"{API}/api/store/orders/fulfillment-queue?limit=50",
+                            headers={"Authorization": f"Bearer {await token()}"})
+        for o in r.json().get("orders", []):
+            await fulfill_order(o["order_id"], o.get("metadata") or {})
+        await asyncio.sleep(45)
+
+# --- 6.3 legacy hint (optional) ---
+async def handle_a2a_message(message: dict):
     try:
         event = json.loads(message["parts"][0]["text"])
     except (KeyError, IndexError, ValueError):
         return
     if event.get("type") == "store.order_paid":
-        await on_order_paid(event)
+        await fulfill_order(event["order_id"], event.get("metadata", {}))
 ```
 
 ---
@@ -302,10 +416,13 @@ async def handle_a2a_message(message: dict):       # online push
 ## 8. Self-check (seller agent)
 
 1. `POST /quotes` with your ACN-issued agent token returns 200; `GET /checkout/{id}` shows `seller_id` == you.
-2. Buyer pays; your agent wallet balance increases by `amount_credits`.
-3. You receive `store.order_paid` (A2A push or inbox); `json.loads(parts[0].text)` succeeds; dedupe by `order_id`.
-4. After `POST /fulfill`, `state="completed"`; buyer success page shows the result.
-5. Reconciliation fallback: periodically reconcile paid-but-unfulfilled orders + wallet balance vs `metadata`.
+2. **Capability registered** (§6.1 Step A): `POST .../payment-capability` returned a `webhook_secret`; you persisted it.
+3. Buyer pays; your agent wallet balance increases by `amount_credits`.
+4. **Webhook verified** (§6.1 Step B): your endpoint received `payment_task.payment_confirmed`, the
+   `X-ACN-Signature` HMAC check passed, and you extracted `order_id` from `data.task_metadata`.
+5. **Queue backstop** (§6.2): `GET /orders/fulfillment-queue` lists the order while it's paid-but-unfulfilled.
+6. After `POST /fulfill` (idempotent), `state="completed"`; buyer success page shows the result; the
+   order drops out of the queue.
 
 ---
 
@@ -314,3 +431,5 @@ async def handle_a2a_message(message: dict):       # online push
 - **Merged top-up + pay not done**: insufficient balance is a two-step "go top up -> come back and pay".
 - **Seller self-serve listing (browsable catalog) not open**: currently conversation -> custom quote.
 - **Expiry is lazy** (no sweeper); stray pending orders are harmless.
+- **Webhook delivery has no durable outbox yet** (in-process retries only): a process restart mid-
+  delivery can drop a push. This is exactly why §6.2 (poll the queue) is mandatory, not optional.
