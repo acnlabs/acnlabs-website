@@ -88,10 +88,15 @@ async function fetchRaw(url: string): Promise<string | null> {
   }
 }
 
-let _cache: LoadedSkill[] | null = null;
+// Short TTL cache. With on-demand + ISR (see astro.config.mjs) the edge already
+// caches responses for the ISR `expiration`; this in-process cache only dedupes
+// the live fetch across calls within a single request / warm invocation. Keep
+// the TTL below the ISR expiration so every regeneration re-fetches the source.
+const _CACHE_TTL_MS = 60_000;
+let _cache: { at: number; skills: LoadedSkill[] } | null = null;
 
 export async function loadSkills(): Promise<LoadedSkill[]> {
-  if (_cache) return _cache;
+  if (_cache && Date.now() - _cache.at < _CACHE_TTL_MS) return _cache.skills;
   const processor = await createMarkdownProcessor({});
   const loaded: LoadedSkill[] = [];
   for (const s of SKILL_SOURCES) {
@@ -116,7 +121,7 @@ export async function loadSkills(): Promise<LoadedSkill[]> {
       fresh: live != null,
     });
   }
-  _cache = loaded;
+  _cache = { at: Date.now(), skills: loaded };
   return loaded;
 }
 

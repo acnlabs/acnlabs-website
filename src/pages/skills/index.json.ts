@@ -1,6 +1,9 @@
 import type { APIRoute } from "astro";
 import { loadSkills } from "@/lib/skills";
 
+// On-demand + ISR (see astro.config.mjs): the manifest tracks live skill data.
+export const prerender = false;
+
 const BASE = "https://acnlabs.dev";
 
 export const GET: APIRoute = async () => {
