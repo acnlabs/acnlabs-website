@@ -4,6 +4,10 @@ import Container from "@/components/container.astro";
 import Sectionhead from "@/components/sectionhead.astro";
 import { loadSkills } from "@/lib/skills";
 
+// On-demand + ISR (see astro.config.mjs) so the catalog reflects live skill
+// versions without a site rebuild.
+export const prerender = false;
+
 const skills = await loadSkills();
 
 const ownerColors: Record<string, string> = {

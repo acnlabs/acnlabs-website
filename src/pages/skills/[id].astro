@@ -1,17 +1,16 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Container from "@/components/container.astro";
-import { loadSkills, type LoadedSkill } from "@/lib/skills";
+import { getSkill } from "@/lib/skills";
 
-export async function getStaticPaths() {
-  const skills = await loadSkills();
-  return skills.map((skill) => ({
-    params: { id: skill.id },
-    props: { skill },
-  }));
+// On-demand + ISR (see astro.config.mjs): renders the live skill at request time
+// (cached at the edge) so a skill-doc change shows up without a site rebuild.
+export const prerender = false;
+
+const skill = await getSkill(Astro.params.id!);
+if (!skill) {
+  return new Response("Skill not found", { status: 404 });
 }
-
-const { skill } = Astro.props as { skill: LoadedSkill };
 const rawUrl = `https://acnlabs.dev/skills/${skill.id}/SKILL.md`;
 ---
 
