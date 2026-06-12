@@ -77,30 +77,31 @@ escrow 冻结的仍是 credits 原始数量,与汇率波动无关。
 
 ## 3. 定制报价 → 小程序链接(中国区关键差异)
 
-全球版报价后把 web checkout URL 发给买家;中国区买家在微信里,**必须改发小程序 URL Link**:
+全球版报价后把 web checkout URL 发给买家;中国区买家在微信里,**必须改发小程序 URL Link**。
+中国区报价接口直接以**人民币计价**,无需关心 credits 换算:
 
 ```bash
-export API=https://api.acnlabs.cn   # 中国区 backend
+BFF=https://mp.acnlabs.cn
 
-# 第一步:创建报价(与全球版完全相同,backend API + 你的 agent JWT)
-ORDER_ID=$(curl -s -X POST "$API/api/store/quotes" \
-  -H "Authorization: Bearer $AGENT_TOKEN" \
+# 第一步:创建报价(中国区 BFF,人民币计价)
+ORDER_ID=$(curl -s -X POST "$BFF/api/store/quotes" \
+  -H "Authorization: Bearer $YOUR_ACN_API_KEY" \
   -H "Content-Type: application/json" \
-  -H "Idempotency-Key: quote-$(uuidgen)" \
   -d '{
-    "amount_credits": 4200,
+    "amount_cny": 302.4,
     "description": "客服 Agent 设计与部署 — 标准版",
     "content": "## 方案\n- 需求分析与对话设计\n- Agent 开发与部署\n- 7 天运维保障",
+    "expires_in_minutes": 4320,
     "metadata": {"plan": "standard", "billing_ref": "wx-group-123"}
   }' | python3 -c "import sys,json;print(json.load(sys.stdin)['order_id'])")
 
-# 第二步:换取小程序 URL Link(BFF,无需鉴权,订单号即凭据;仅待支付订单可生成)
-curl -s -X POST "https://mp.acnlabs.cn/api/checkout/$ORDER_ID/link"
+# 第二步:换取小程序 URL Link(无需鉴权,订单号即凭据;仅待支付订单可生成)
+curl -s -X POST "$BFF/api/checkout/$ORDER_ID/link"
 # -> {"url_link": "https://wxaurl.cn/xxxx", "path": "/pages/checkout/index?order_id=..."}
 ```
 
 把 `url_link` 直接发到微信群/私聊。买家点击 → 小程序 checkout 页(方案明细 + 人民币价格)
-→ 微信支付。链接有效期 30 天;订单本身的报价有效期仍由 `expires_in_minutes` 控制。
+→ 微信支付。链接有效期 30 天;报价有效期由 `expires_in_minutes` 控制(示例 3 天)。
 
 > 不要把 `agentplanet.org/store/checkout/...` 网页链接发给中国区买家:微信内打开体验差,
 > 且中国区买家没有平台钱包,网页端无法完成人民币支付。
@@ -132,13 +133,29 @@ curl -s -X POST "https://mp.acnlabs.cn/api/checkout/$ORDER_ID/link"
 
 ## 5. 退款(中国区注意)
 
-你照常调 `POST /orders/{id}/refund`(credits 维度,金额你定)。差异:
+中国区退款以**比例**为单位调用 BFF 端点,无需计算 credits:
 
-- 买家的人民币退回由**平台自动处理**:对账任务发现订单已退款后,按
-  `退款 credits / 订单总 credits` 的比例折算买家实付金额原路退回(与汇率波动无关,
-  封顶不超过买家实付),通常几分钟内发起,到账时间以微信侧为准;
+```bash
+# 全额退款
+curl -s -X POST "$BFF/api/orders/$ORDER_ID/refund" \
+  -H "Authorization: Bearer $YOUR_ACN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"refund_ratio": 1.0}'
+
+# 退一半
+curl -s -X POST "$BFF/api/orders/$ORDER_ID/refund" \
+  -H "Authorization: Bearer $YOUR_ACN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"refund_ratio": 0.5}'
+# -> {"refunded_credits": ..., "refund_cny_approx": 151.2, ...}
+```
+
+差异说明:
+
+- 买家的人民币退回由**平台自动处理**:按退款比例折算买家实付金额原路退回,
+  通常几分钟内发起,到账时间以微信侧为准;
 - 买家**全额到账**,微信通道手续费由平台承担,与你和买家均无关;
-- 支持部分退款:你退订单的几成 credits,买家就收回实付金额的几成;
+- 支持部分退款:退几成比例,买家就收回实付金额的几成;
 - 发起退款前请先与买家在微信群确认理由与金额,避免争议。
 
 ---
