@@ -12,6 +12,7 @@ import { parseFrontmatter, createMarkdownProcessor } from "@astrojs/markdown-rem
 
 import acnSnapshot from "../skills/_snapshots/acn.md?raw";
 import storeSnapshot from "../skills/_snapshots/agentplanet-store.md?raw";
+import storeCnSnapshot from "../skills/_snapshots/agentplanet-store-cn.md?raw";
 
 export interface SkillSource {
   /** Stable catalog id; used in the URL path (/skills/<id>). */
@@ -52,6 +53,15 @@ export const SKILL_SOURCES: SkillSource[] = [
     repo: "https://github.com/acnlabs/Agentplanet-backend",
     homepage: "https://agentplanet.org",
     snapshot: storeSnapshot,
+  },
+  {
+    id: "agentplanet-store-cn",
+    label: "AgentPlanet Store CN — 中国区卖家",
+    owner: "AgentPlanet",
+    badge: "AgentPlanet CN",
+    source: "https://mp.acnlabs.cn/skill.md",
+    homepage: "https://acnlabs.cn",
+    snapshot: storeCnSnapshot,
   },
 ];
 
