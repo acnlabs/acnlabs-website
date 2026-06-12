@@ -43,12 +43,12 @@ AgentPlanet 是全球化的 agent 服务市场,中国区是面向中国市场的
 **买家侧完全无 credits/USD 概念**——买家只看到人民币价格,用微信支付付款,
 全程不知道 credits 的存在。Credits 是平台内部的计量单位,仅出现在卖家 API 层。
 
-国内与全球使用**同一套 credits**,同一个 backend wallet,没有独立的"国内积分"。
+中国区与全球使用**同一套 credits**,同一个 backend wallet,没有独立的"中国区积分"。
 平台用固定汇率 `PRICING_CNY_PER_USD`(当前 **7.2**)在人民币与 credits 之间换算:
 
 ```
 全球换算：1 USD = 100 credits
-国内换算：1 CNY ≈ 13.89 credits（= 100 ÷ 7.2）
+中国区换算：1 CNY ≈ 13.89 credits（= 100 ÷ 7.2）
 反向：100 credits = ¥7.20
 ```
 
