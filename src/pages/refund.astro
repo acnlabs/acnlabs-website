@@ -1,0 +1,126 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Container from "@/components/container.astro";
+import Sectionhead from "@/components/sectionhead.astro";
+---
+
+<Layout title="Refund Policy — ACN Labs">
+  <Container>
+    <Sectionhead>
+      <Fragment slot="title">Refund Policy · 退款政策</Fragment>
+      <Fragment slot="desc">Effective September 20, 2026 · 2026 年 9 月 20 日生效</Fragment>
+    </Sectionhead>
+
+    <div class="flex flex-col gap-10 mx-auto max-w-3xl mt-16 text-slate-600">
+      <!-- ================= English ================= -->
+      <section id="en" class="flex flex-col gap-6">
+        <h2 class="font-bold text-2xl text-gray-800">Refund Policy (English)</h2>
+
+        <p class="leading-relaxed">
+          This policy applies to purchases made on Interfaze / AgentPlanet — credit
+          recharges and subscription plans — paid via PayPal (global) or Alipay /
+          WeChat Pay (China region). Credits and subscriptions are digital goods,
+          delivered immediately upon payment.
+        </p>
+
+        <div>
+          <h3 class="font-semibold text-lg text-gray-800 mb-2">1. We will refund</h3>
+          <ul class="list-disc pl-6 space-y-1.5 leading-relaxed">
+            <li><strong>Payment succeeded but not delivered</strong> — credits were not credited or the plan was not activated due to a system fault.</li>
+            <li><strong>Duplicate charges</strong> — the same order was charged more than once.</li>
+            <li><strong>Unauthorized charges</strong> — verified fraudulent or unauthorized payments.</li>
+            <li><strong>Accidental subscription purchase</strong> — requested within 72 hours of purchase <em>and</em> zero credits from the new subscription period have been consumed.</li>
+            <li><strong>Auto-renewal grace</strong> — requested within 72 hours of a renewal charge <em>and</em> the new billing period is unused.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-lg text-gray-800 mb-2">2. We cannot refund</h3>
+          <ul class="list-disc pl-6 space-y-1.5 leading-relaxed">
+            <li>Credits that have already been consumed.</li>
+            <li>Subscription periods already in use, or requests beyond the 72-hour grace window.</li>
+            <li>Virtual items redeemed with credits in the Store — spending credits is not a cash transaction.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-lg text-gray-800 mb-2">3. How to request</h3>
+          <p class="leading-relaxed">
+            Email <a href="mailto:hello@acn.ai" class="text-indigo-600 hover:underline">hello@acn.ai</a> with
+            your account email, the order ID or payment receipt, and the reason. We review
+            requests within 3 business days. Approved refunds are returned via the original
+            payment channel; arrival time depends on the channel (PayPal / Alipay / WeChat Pay).
+          </p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-lg text-gray-800 mb-2">4. Notes</h3>
+          <ul class="list-disc pl-6 space-y-1.5 leading-relaxed">
+            <li>Refunded amounts have the corresponding credits deducted; if the credits were already consumed, the refund may be reduced or denied.</li>
+            <li>Payment channel fees may be non-refundable (PayPal does not return its processing fee); any non-recoverable channel fee may be deducted from the refund.</li>
+            <li>Please contact us before filing a dispute with your payment provider — we resolve refund requests faster and a dispute adds significant processing time and cost for both sides.</li>
+          </ul>
+        </div>
+      </section>
+
+      <hr class="border-slate-200" />
+
+      <!-- ================= 中文 ================= -->
+      <section id="zh" class="flex flex-col gap-6">
+        <h2 class="font-bold text-2xl text-gray-800">退款政策（中文）</h2>
+
+        <p class="leading-relaxed">
+          本政策适用于在 Interfaze / AgentPlanet 上的充值与订阅购买，支付渠道包括
+          PayPal（全球）及支付宝 / 微信支付（中国区）。积分与订阅属于数字化商品，
+          支付成功后即时交付。依据相关法规，已交付的数字化商品不适用七天无理由退货，
+          但以下情形除外。
+        </p>
+
+        <div>
+          <h3 class="font-semibold text-lg text-gray-800 mb-2">一、可以退款的情形</h3>
+          <ul class="list-disc pl-6 space-y-1.5 leading-relaxed">
+            <li><strong>支付成功但未到账</strong>——因系统故障导致积分未入账或套餐未激活。</li>
+            <li><strong>重复扣款</strong>——同一笔订单被重复收费。</li>
+            <li><strong>未授权扣款</strong>——经核实非本人授权的支付。</li>
+            <li><strong>订阅误购</strong>——购买后 72 小时内提出申请，<em>且</em>新订阅周期的积分零消耗。</li>
+            <li><strong>自动续费宽限</strong>——续费扣款后 72 小时内提出申请，且新账期未使用。</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-lg text-gray-800 mb-2">二、无法退款的情形</h3>
+          <ul class="list-disc pl-6 space-y-1.5 leading-relaxed">
+            <li>积分已被消耗的部分。</li>
+            <li>订阅期已使用，或超出 72 小时宽限期的申请。</li>
+            <li>在商店中使用积分兑换的虚拟商品——积分消费不属于现金交易。</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-lg text-gray-800 mb-2">三、申请方式</h3>
+          <p class="leading-relaxed">
+            请发送邮件至 <a href="mailto:hello@acn.ai" class="text-indigo-600 hover:underline">hello@acn.ai</a>，
+            附上注册邮箱、订单号或支付凭证及退款原因。我们将在 3 个工作日内完成审核。
+            审核通过后，款项将按原支付渠道退回（PayPal / 支付宝 / 微信支付），
+            到账时间以各渠道为准。
+          </p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-lg text-gray-800 mb-2">四、其他说明</h3>
+          <ul class="list-disc pl-6 space-y-1.5 leading-relaxed">
+            <li>退款将扣减对应积分；若积分已消耗，退款金额可能相应减少或无法退还。</li>
+            <li>支付渠道手续费可能无法退回（PayPal 不退还其手续费）；不可回收的渠道费用可能从退款中扣除。</li>
+            <li>如已开具增值税发票，退款前需配合完成红字发票（红冲）流程。</li>
+            <li>发起支付争议（chargeback）前请先联系我们——直接沟通的处理速度远快于争议流程，对双方都更省时省力。</li>
+          </ul>
+        </div>
+      </section>
+
+      <p class="text-sm text-slate-400">
+        Questions about this policy: <a href="mailto:hello@acn.ai" class="text-indigo-600 hover:underline">hello@acn.ai</a>
+        · 如有疑问请联系：<a href="mailto:hello@acn.ai" class="text-indigo-600 hover:underline">hello@acn.ai</a>
+      </p>
+    </div>
+  </Container>
+</Layout>
